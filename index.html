@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💎 DARK STORE — Top Up & Servis</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}
+:root{--cream:#fef9e7;--cream-dark:#f4e4bc;--blue:#0099ff;--blue-dark:#0066cc;--red:#e94560;--gold:#ffd700;--green:#22c55e;--purple:#a855f7;--dark:#1a1a2e;--light:#ffffff;--gray:#666;--border:#e0d0b0}
+body{background:linear-gradient(135deg,var(--cream) 0%,var(--cream-dark) 100%);min-height:100vh;color:#333;line-height:1.6;padding-bottom:40px}
+
+.top-bar{background:var(--dark);padding:12px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,0.15)}
+.logo{font-size:1.35rem;font-weight:bold;color:var(--light);display:flex;align-items:center;gap:8px}
+.logo span{color:var(--gold)}
+.admin-btn{background:var(--red);color:#fff;border:none;padding:8px 16px;border-radius:20px;font-weight:bold;cursor:pointer;font-size:0.85rem;box-shadow:0 2px 8px rgba(233,69,96,0.3)}
+
+.tabs{background:var(--cream);padding:10px;display:flex;gap:6px;justify-content:center;flex-wrap:wrap;border-bottom:2px solid var(--border);position:sticky;top:60px;z-index:99}
+.tab{background:transparent;border:none;padding:9px 14px;border-radius:20px;cursor:pointer;font-size:0.85rem;color:var(--gray);border:2px solid transparent;transition:0.2s}
+.tab.active{background:var(--blue);color:#fff;border-color:var(--blue);box-shadow:0 3px 10px rgba(0,153,255,0.25)}
+
+.wrap{max-width:520px;margin:0 auto;padding:15px}
+.page{display:none;animation:fadeIn 0.3s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:25px}
+.item-card{background:var(--light);border:3px solid var(--dark);border-radius:18px;padding:18px 10px;text-align:center;cursor:pointer;transition:0.25s;box-shadow:0 3px 10px rgba(0,0,0,0.07)}
+.item-card:hover{transform:translateY(-3px);box-shadow:0 6px 18px rgba(0,0,0,0.12);border-color:var(--blue)}
+.item-card.selected{border-color:var(--blue);background:#e6f4ff;box-shadow:0 0 0 3px rgba(0,153,255,0.15)}
+.item-icon{font-size:1.8rem;margin-bottom:6px}
+.item-name{font-weight:bold;font-size:0.85rem;line-height:1.3;margin-bottom:5px}
+.item-price{font-size:1.1rem;font-weight:bold;color:var(--blue)}
+
+.form-card{background:var(--light);border:3px solid var(--dark);border-radius:20px;padding:22px;margin-bottom:20px;box-shadow:0 4px 15px rgba(0,0,0,0.06)}
+.step{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.step-num{width:36px;height:36px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:1rem;flex-shrink:0}
+.step-title{font-size:1rem;color:var(--dark);font-weight:bold}
+.input{width:100%;padding:12px;border:2px solid #ddd;border-radius:10px;font-size:0.95rem;margin-bottom:12px;transition:0.2s}
+.input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,153,255,0.1)}
+.textarea{width:100%;padding:12px;border:2px solid #ddd;border-radius:10px;font-size:0.95rem;margin-bottom:12px;min-height:90px;resize:none}
+.textarea:focus{outline:none;border-color:var(--blue)}
+.info-box{background:#e6f4ff;border:2px solid rgba(0,153,255,0.18);border-radius:12px;padding:14px;margin:12px 0;font-size:0.85rem;line-height:1.7}
+.selected-summary{background:#f5f5f5;border-radius:10px;padding:12px;margin:14px 0}
+.selected-summary p:first-child{font-weight:bold;margin-bottom:4px;color:#444;font-size:0.9rem}
+.submit-btn{width:100%;background:linear-gradient(135deg,var(--blue),var(--blue-dark));color:#fff;border:none;padding:14px;border-radius:12px;font-size:1rem;font-weight:bold;cursor:pointer;margin-top:8px;box-shadow:0 4px 12px rgba(0,102,204,0.3);transition:0.2s}
+.submit-btn:hover{transform:scale(1.02)}
+
+.warning-box{background:#fff8e1;border:2px solid #ffc107;border-radius:12px;padding:16px;margin:20px 0;font-size:0.85rem;line-height:1.7}
+.warning-box h4{color:#856404;margin-bottom:8px;font-size:0.95rem}
+.warning-box ol{padding-left:20px;margin-top:6px}
+.warning-box li{margin-bottom:5px}
+.final-note{color:#d32f2f;font-weight:bold;margin-top:8px}
+
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:199}
+.overlay.show{display:block}
+.modal{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:20px;padding:25px;z-index:200;width:90%;max-width:420px;box-shadow:0 10px 40px rgba(0,0,0,0.2)}
+.modal.show{display:block}
+.modal h3{text-align:center;color:var(--dark);margin-bottom:18px}
+.modal input,.modal select{width:100%;padding:12px;margin:6px 0 14px;border-radius:10px;border:2px solid #ddd;font-size:0.95rem}
+.modal-btn{padding:11px 15px;border-radius:10px;border:none;font-weight:bold;cursor:pointer;margin:5px;font-size:0.9rem;width:100%}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-danger{background:var(--red);color:#fff}
+.btn-success{background:var(--green);color:#fff}
+.btn-gray{background:#ddd;color:#333}
+.btn-row{display:flex;gap:8px}
+
+.help-card{background:#fff;border:3px solid var(--dark);border-radius:20px;padding:22px}
+.help-card h3{color:var(--blue);margin:16px 0 6px;font-size:0.95rem}
+.help-card p{margin-bottom:10px;color:#444;font-size:0.85rem}
+.wa-btn{display:block;text-align:center;background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;padding:13px 18px;border-radius:12px;text-decoration:none;font-weight:bold;margin-top:18px;font-size:0.95rem}
+
+footer{text-align:center;padding:18px;margin-top:25px;color:#999;font-size:0.8rem}
+
+.admin-panel{background:#fff;border:3px solid var(--red);border-radius:20px;padding:25px;margin-bottom:20px}
+.admin-panel h3{color:var(--red);margin-bottom:15px;text-align:center}
+.admin-hidden{display:none !important}
+.product-item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-bottom:1px solid #eee}
+.del-prod-btn{background:var(--red);color:#fff;border:none;padding:5px 10px;border-radius:8px;cursor:pointer;font-size:0.8rem}
+</style>
+</head>
+<body>
+
+<button class="admin-btn" id="adminLoginBtn" onclick="showLoginModal()">🔐 ADMIN</button>
+
+<div class="top-bar">
+  <div class="logo">💎 <span>DARK STORE</span></div>
+  <div style="font-size:0.8rem;color:#999">#ragumu_rugimu</div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" data-page="ff">🔥 FF</button>
+  <button class="tab" data-page="ml">⚔️ MLBB</button>
+  <button class="tab" data-page="sewa">📦 Sewa</button>
+  <button class="tab" data-page="boost">🚀 Boost</button>
+  <button class="tab" data-page="promo">📢 Promoter</button>
+  <button class="tab" data-page="help">❓ Bantuan</button>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeAllModals()"></div>
+
+<div class="modal" id="loginModal">
+  <h3>🔐 LOGIN ADMIN</h3>
+  <input type="password" id="adminPassword" placeholder="Masukkan Kata Laluan Admin">
+  <button class="modal-btn btn-primary" onclick="adminLogin()">🔑 LOGIN</button>
+  <button class="modal-btn btn-gray" onclick="closeAllModals()">❌ TUTUP</button>
+</div>
+
+<div class="modal" id="adminModal" style="max-width:500px;max-height:90vh;overflow-y:auto">
+  <h3 style="color:var(--red)">⚙️ PANEL KAWALAN ADMIN</h3>
+  
+  <h4 style="margin:15px 0 8px">➕ TAMBAH PRODUK BARU</h4>
+  <input type="text" id="newProdName" placeholder="Nama Produk">
+  <input type="text" id="newProdPrice" placeholder="Harga (contoh: RM5.00)">
+  <select id="newProdCat">
+    <option value="ff">🔥 Free Fire</option>
+    <option value="ml">⚔️ MLBB</option>
+    <option value="sewa">📦 Sewa Bot</option>
+    <option value="boost">🚀 Boost Channel</option>
+    <option value="promo">📢 Promoter</option>
+  </select>
+  <button class="modal-btn btn-success" onclick="addNewProduct()">✅ TAMBAH PRODUK</button>
+  
+  <h4 style="margin:20px 0 8px">📦 SENARAI PRODUK</h4>
+  <div id="productList"></div>
+  
+  <h4 style="margin:20px 0 8px">🔐 TUKAR KATA LALUAN</h4>
+  <input type="password" id="newPass1" placeholder="Kata Laluan Baru">
+  <input type="password" id="newPass2" placeholder="Sahkan Kata Laluan Baru">
+  <button class="modal-btn btn-primary" onclick="changePassword()">🔄 TUKAR KATA LALUAN</button>
+  
+  <div class="btn-row" style="margin-top:20px">
+    <button class="modal-btn btn-gray" onclick="closeAllModals()">❌ TUTUP</button>
+    <button class="modal-btn btn-danger" onclick="adminLogout()">🚪 LOGOUT</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+<div id="ff" class="page active">
+  <div class="grid" id="ffGrid">
+    <div class="item-card" data-name="5 Berlian (5+0 Bonus)" data-price="RM0.41">
+      <div class="item-icon">💎</div>
+      <div class="item-name">5 Berlian<br>(5+0)</div>
+      <div class="item-price">RM0.41</div>
+    </div>
+    <div class="item-card" data-name="12 Berlian (11+1 Bonus)" data-price="RM1.01">
+      <div class="item-icon">💎</div>
+      <div class="item-name">12 Berlian<br>(11+1)</div>
+      <div class="item-price">RM1.01</div>
+    </div>
+    <div class="item-card" data-name="19 Berlian (17+2 Bonus)" data-price="RM1.53">
+      <div class="item-icon">💎</div>
+      <div class="item-name">19 Berlian<br>(17+2)</div>
+      <div class="item-price">RM1.53</div>
+    </div>
+    <div class="item-card" data-name="28 Berlian (25+3 Bonus)" data-price="RM2.20">
+      <div class="item-icon">💎</div>
+      <div class="item-name">28 Berlian<br>(25+3)</div>
+      <div class="item-price">RM2.20</div>
+    </div>
+    <div class="item-card" data-name="44 Berlian (40+4 Bonus)" data-price="RM3.32">
+      <div class="item-icon">💎</div>
+      <div class="item-name">44 Berlian<br>(40+4)</div>
+      <div class="item-price">RM3.32</div>
+    </div>
+    <div class="item-card" data-name="59 Berlian (53+6 Bonus)" data-price="RM4.39">
+      <div class="item-icon">💎</div>
+      <div class="item-name">59 Berlian<br>(53+6)</div>
+      <div class="item-price">RM4.39</div>
+    </div>
+    <div class="item-card" data-name="85 Berlian (77+8 Bonus)" data-price="RM6.35">
+      <div class="item-icon">💎</div>
+      <div class="item-name">85 Berlian<br>(77+8)</div>
+      <div class="item-price">RM6.35</div>
+    </div>
+    <div class="item-card" data-name="113 Berlian (102+11 Bonus)" data-price="RM8.56">
+      <div class="item-icon">💎</div>
+      <div class="item-name">113 Berlian<br>(102+11)</div>
+      <div class="item-price">RM8.56</div>
+    </div>
+    <div class="item-card" data-name="170 Berlian" data-price="RM12.50">
+      <div class="item-icon">💎</div>
+      <div class="item-name">170 Berlian</div>
+      <div class="item-price">RM12.50</div>
+    </div>
+    <div class="item-card" data-name="240 Berlian" data-price="RM16.99">
+      <div class="item-icon">💎</div>
+      <div class="item-name">240 Berlian</div>
+      <div class="item-price">RM16.99</div>
+    </div>
+  </div>
+  <div class="form-card">
+    <div class="step"><div class="step-num">1</div><div class="step-title">DATA AKAUN</div></div>
+    <label style="font-weight:bold;color:#444;font-size:0.9rem">ID PENGGUNA</label>
+    <input type="text" class="input" id="ffUid" placeholder="Masukkan ID Pengguna">
+    <label style="font-weight:bold;color:#444;font-size:0.9rem">ID PELAYAN / SERVER</label>
+    <input type="text" class="input" id="ffSid" placeholder="Masukkan ID Pelayan">
+    <div class="info-box">ⓘ Tekan avatar kiri atas → tab Maklumat Umum. Contoh: 12345678(1234)</div>
+    <div class="step"><div class="step-num" style="background:#ffc107;color:#333">2</div><div class="step-title">PILIH PRODUK</div></div>
+    <div class="selected-summary"><p>✅ DIPILIH:</p><p id="ffSel">Belum pilih 👆</p></div>
+    <button class="submit-btn" onclick="submitFF()">📤 HANTAR PESANAN</button>
+  </div>
+  <div class="warning-box">
+    <h4>⚠️ NOTA PENTING</h4>
+    <p>Pastikan ID & Server betul + rantau sama (Malaysia-Malaysia). Semak: Profil → ⋮ → Semak Wilayah.</p>
+    <p class="final-note">• TIADA REFUND selepas bayar • Beli atas tanggungan sendiri</p>
+  </div>
+</div>
+
+<div id="ml" class="page">
+  <div class="grid" id="mlGrid">
+    <div class="item-card" data-name="14 Diamond" data-price="RM1.50">
+      <div class="item-icon">💎</div>
+      <div class="item-name">14 Diamond</div>
+      <div class="item-price">RM1.50</div>
+    </div>
+    <div class="item-card" data-name="42 Diamond" data-price="RM3.50">
+      <div class="item-icon">💎</div>
+      <div class="item-name">42 Diamond</div>
+      <div class="item-price">RM3.50</div>
+    </div>
+    <div class="item-card" data-name="56 Diamond" data-price="RM4.50">
+      <div class="item-icon">💎</div>
+      <div class="item-name">56 Diamond</div>
+      <div class="item-price">RM4.50</div>
+    </div>
+    <div class="item-card" data-name="70 Diamond" data-price="RM5.50">
+      <div class="item-icon">💎</div>
+      <div class="item-name">70 Diamond</div>
+      <div class="item-price">RM5.50</div>
+    </div>
+    <div class="item-card" data-name="140 Diamond" data-price="RM11.50">
+      <div class="item-icon">💎</div>
+      <div class="item-name">140 Diamond</div>
+      <div class="item-price">RM11.50</div>
+    </div>
+    <div class="item-card" data-name="168 Diamond" data-price="RM14.50">
+      <div class="item-icon">💎</div>
+      <div class="item-name">168 Diamond</div>
+      <div class="item-price">RM14.50</div>
+    </div>
+    <div class="item-card" data-name="278 Diamond" data-price="RM23.00">
+      <div class="item-icon">💎</div>
+      <div class="item-name">278 Diamond</div>
+      <div class="item-price">RM23.00</div>
+    </div>
+    <div class="item-card" data-name="397 Diamond" data-price="RM31.00">
+      <div class="item-icon">💎</div>
+      <div class="item-name">397 Diamond</div>
+      <div class="item-price">RM31.00</div>
+    </div>
+    <div class="item-card" data-name="429 Diamond" data-price="RM35.00">
+      <div class="item-icon">💎</div>
+      <div class="item-name">429 Diamond</div>
+      <div class="item-price">RM35.00</div>
+    </div>
+    <div class="item-card" data-name="571 Diamond" data-price="RM46.00">
+      <div class="item-icon">💎</div>
+      <div class="item-name">571 Diamond</div>
+      <div class="item-price">RM46.00</div>
+    </div>
+  </div>
+  <div class="form-card">
+    <div class="step"><div class="step-num">1</div><div class="step-title">DATA AKAUN MLBB</div></div>
+    <label style="font-weight:bold;color:#444;font-size:0.9rem">ID PENGGUNA</label>
+    <input type="text" class="input" id="mlUid" placeholder="Masukkan ID Pengguna">
+    <label style="font-weight:bold;color:#444;font-size:0.9rem">ID SERVER</label>
+    <input type="text" class="input" id="mlSid" placeholder="Masukkan ID Server">
+    <div class="info-box">ⓘ Buka profil → ID ada dalam kurungan. Contoh: 12345678(1234)</div>
+    <div class="selected-summary"><p>✅ DIPILIH:</p><p id="mlSel">Belum pilih 👆</p></div>
+    <button class="submit-btn" onclick="submitML()">📤 HANTAR PESANAN</button>
+  </div>
+</div>
+
+<div id="sewa" class="page">
+  <div class="grid" id="sewaGrid">
+    <div class="item-card" data-name="Sewa Bot — 1 Hari" data-price="RM3.00">
+      <div class="item-icon">🤖</div>
+      <div class="item-name">Sewa Bot<br>1 Hari</div>
+      <div class="item-price">RM3.00</div>
+    </div>
+    <div class="item-card" data-name="Sewa Bot — 7 Hari" data-price="RM15.00">
+      <div class="item-icon">🤖</div>
+      <div class="item-name">Sewa Bot<br>7 Hari</div>
+      <div class="item-price">RM15.00</div>
+    </div>
+    <div class="item-card" data-name="Sewa Bot — 30 Hari" data-price="RM35.00">
+      <div class="item-icon">🤖</div>
+      <div class="item-name">Sewa Bot<br>30 Hari</div>
+      <div class="item-price">RM35.00</div>
+    </div>
+    <div class="item-card" data-name="Sewa Bot — Selamanya" data-price="RM120.00">
+      <div class="item-icon">🤖♾️</div>
+      <div class="item-name">Sewa Bot<br>Selamanya</div>
+      <div class="item-price">RM120.00</div>
+    </div>
+  </div>
+  <div class="form-card">
+    <div class="step"><div class="step-num">📦</div><div class="step-title">BUTIRAN SEWA</div></div>
+    <label style="font-weight:bold;color:#444;font-size:0.9rem">NAMA / ID TELEGRAM</label>
+    <input type="text" class="input" id="sewaName" placeholder="@nama atau ID Telegram">
+    <label style="font-weight:bold;color:#444;font-size:0.9rem">CATATAN TAMBAHAN</label>
+    <textarea class="textarea" id="sewaNote" placeholder="Contoh: Nak bot untuk sebar iklan..."></textarea>
+    <div class="selected-summary"><p>✅ PAKET DIPILIH:</p><p id="sewaSel">Belum pilih 👆</p></div>
+    <button class="submit-btn" onclick="submitSewa()">📤 HANTAR PESANAN</button>
+  </div>
+</div>
+
+<div id="boost" class="page">
+  <div class="grid" id="boostGrid">
+    <div class="item-card" data-name="Boost Channel — 50 Ahli" data-price="RM5.00">
+      <div class="item-icon">🚀</div>
+      <div class="item-name">50 Ahli<br>Channel</div>
+      <div class="item-price">RM5.00</div>
+    </div>
+    <div class="item-card" data-name="Boost Channel — 100 Ahli" data-price="RM9.00">
+      <div class="item-icon">🚀</div>
+      <div class="item-name">100 Ahli<br>Channel</div>
+      <div class="item-price">RM9.00</div>
+    </div>
+    <div class="item-card" data-name="Boost Channel — 250 Ahli" data-price="RM20.00">
+      <div class="item-icon">🚀</div>
+      <div class="item-name">250 Ahli<br>Channel</div>
+      <div class="item-price">RM20.00</div>
+    </div>
+    <div class="item-card" data-name="Boost Channel — 500 Ahli" data-price="RM38.00">
+      <div class="item-icon">🚀</div>
+      <div class="item-name">500 Ahli<br>Channel</div>
+      <div class="item-price">RM38.00</div>
+    </div>
+    <div class="item-card" data-name="Boost Channel — 1000 Ahli" data-price="RM70.00">
+      <div class="item-icon">🚀</div>
+      <div class="item-name">1000 Ahli<br>Channel</div>
+      <div class="item-price">RM70.00</div>
+    </div>
+  </div>
+  <div class="form-card">
+    <div class="step"><div class="step-num">🚀</div><div class="step-title">LINK CHANNEL</div></div>
+    <label style="font-weight:bold;color:#444;font-size:0.9rem">LINK / USERNAME CHANNEL</label>
+    <input type="text" class="input" id="boostLink" placeholder="https://t.me/... atau @channel">
+    <label style="font-weight:bold;color:#444;font-size:0.9rem">JUMLAH AHLI SASARAN</label>
+    <input type="text" class="input" id="boostQty" placeholder="Contoh: 500 ahli">
+    <div class="selected-summary"><p>✅ PAKET DIPILIH:</p><p id="boostSel">Belum pilih 👆</p></div>
+    <button class="submit-btn" onclick="submitBoost()">📤 HANTAR PESANAN</button>
+  </div>
+</div>
+
+<div id="promo" class="page">
+  <div class="grid" id="promoGrid">
+    <div class="item-card" data-name="Promoter — Sebar 10 Group" data-price="RM3.00">
+      <div class="item-icon">📢</div>
+      <div class="item-name">Sebar<br>10 Group</div>
+      <div class="item-price">RM3.00</div>
+    </div>
+    <div class="item-card" data-name="Promoter — Sebar 50 Group" data-price="RM12.00">
+      <div class="item-icon">📢</div>
+      <div class="item-name">Sebar<br>50 Group</div>
+      <div class="item-price">RM12.00</div>
+    </div>
+    <div class="item-card" data-name="Promoter — Sebar 100 Group" data-price="RM22.00">
+      <div class="item-icon">📢</div>
+      <div class="item-name">Sebar<br>100 Group</div>
+      <div class="item-price">RM22.00</div>
+    </div>
+    <div class="item-card" data-name="Promoter — Auto Promote 1 Hari" data-price="RM8.00">
+      <div class="item-icon">🤖📢</div>
+      <div class="item-name">Auto Promote<br>1 Hari</div>
+      <div class="item-price">RM8.00</div>
+    </div>
+    <div class="item-card" data-name="Promoter — Auto Promote 7 Hari" data-price="RM40.00">
+      <div class="item-icon">🤖📢</div>
+      <div class="item-name">Auto Promote<br>7 Hari</div>
+      <div class="item-price">RM40.00</div>
+    </div>
+  </div>
+  <div class="form-card">
+    <div class="step"><div cl
